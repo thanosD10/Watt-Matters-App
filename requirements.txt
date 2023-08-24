@@ -1,0 +1,5 @@
+python-dotenv==0.21.1
+influxdb-client==1.36.1
+entrypoints==0.3
+paho-mqtt==1.6.1
+python-dateutil==2.8.2
