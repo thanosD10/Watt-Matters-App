@@ -194,7 +194,7 @@ def draw_usage_table(self):
     label_usage_money.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 # Refresh electricity usage table every 20 secs
-def refresher():
+def usageTableRefresher():
 
     # kWh = ( (wattsPerSec ÷ 3600) × hrs) ÷ 1,000
     kWh = round(((total_watt / 3600) * running_hours) / 1000, 3)
@@ -203,7 +203,7 @@ def refresher():
     price = round(kWh * 0.12, 3)
     text_price.set(str(price) +  " €")
 
-    app.after(20000, refresher) # every 20 seconds...
+    app.after(20000, usageTableRefresher) # every 20 seconds...
 
 
 class EnergyPage(tk.Frame):
@@ -567,12 +567,18 @@ def query_last_month_values_influxDB():
 
     return std, max, min, morning_avg, noon_avg, afternoon_avg, night_avg
 
-
 class InsightsPage(tk.Frame):
     
     def __init__(self, parent, controller):
 
         tk.Frame.__init__(self, parent, background=WHITE)
+        global str_std_week
+        global str_max_week
+        global str_min_week
+        global str_morning_avg_week
+        global str_noon_avg_week
+        global str_afternoon_avg_week
+        global str_night_avg_week
 
         # Add Top Logo Frame
         frame_top_image = tk.Frame(self, height=123, width=600, borderwidth=2, bg=DARK_BLUE, relief=FLAT)
@@ -708,6 +714,13 @@ class InsightsPage(tk.Frame):
         label_week_avg_night_value.place(relx=0.5, rely=0.5, anchor=CENTER)
 
 
+        global str_std_month
+        global str_max_month
+        global str_min_month
+        global str_morning_avg_month
+        global str_noon_avg_month
+        global str_afternoon_avg_month
+        global str_night_avg_month
 
         # Query InfluxDB database and get last month measurments
         std_month, max_month, min_month, morning_avg_month, noon_avg_month, afternoon_avg_month, night_avg_month = query_last_month_values_influxDB()
@@ -868,6 +881,33 @@ class InsightsPage(tk.Frame):
                                      command=lambda: controller.show_frame(ProfilePage))
         button_menu_profile.place(x=450, y=900)
 
+# Refresh insights table every 20 secs
+def insightsTableRefresher():
+
+    # Update insights table week values
+    std_week, max_week, min_week, morning_avg_week, noon_avg_week, afternoon_avg_week, night_avg_week = query_last_week_values_influxDB()
+
+    str_std_week.set(str(round(std_week, 2)))
+    str_max_week.set(str(max_week))
+    str_min_week.set(str(min_week))
+    str_morning_avg_week.set(str(round(morning_avg_week, 2)))
+    str_noon_avg_week.set(str(round(noon_avg_week, 2)))
+    str_afternoon_avg_week.set(str(round(afternoon_avg_week, 2)))
+    str_night_avg_week.set(str(round(night_avg_week, 2)))
+
+    # Update insights table month values
+    std_month, max_month, min_month, morning_avg_month, noon_avg_month, afternoon_avg_month, night_avg_month = query_last_month_values_influxDB()
+    
+    str_std_month.set(str(round(std_month, 2)))
+    str_max_month.set(str(max_month))
+    str_min_month.set(str(min_month))
+    str_morning_avg_month.set(str(round(morning_avg_month, 2)))
+    str_noon_avg_month.set(str(round(noon_avg_month, 2)))
+    str_afternoon_avg_month.set(str(round(afternoon_avg_month, 2)))
+    str_night_avg_month.set(str(round(night_avg_month, 2)))
+
+    app.after(20000, insightsTableRefresher) # every 20 seconds...
+
 
 class ProfilePage(tk.Frame):
     
@@ -935,6 +975,7 @@ class ProfilePage(tk.Frame):
 
 app = WattMattersApp()
 ani = animation.FuncAnimation(f, animate, fargs=(xs, ys), interval=1000) #1000 millisec = 1 sec
-refresher()
+usageTableRefresher()
+insightsTableRefresher()
 
 app.mainloop()
